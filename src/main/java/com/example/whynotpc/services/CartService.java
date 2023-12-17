@@ -1,6 +1,5 @@
 package com.example.whynotpc.services;
 
-import com.example.whynotpc.models.dto.OrderDTO;
 import com.example.whynotpc.models.order.Order;
 import com.example.whynotpc.models.order.OrderItem;
 import com.example.whynotpc.models.response.CartResponse;
@@ -40,14 +39,9 @@ public class CartService {
         return orderRepo.findCartByUser(user).orElseThrow(IllegalArgumentException::new);
     }
 
-    private OrderDTO toDto(Order order) {
-        return new OrderDTO(order.getId(), order.getStatus().name(),
-                order.getTotal(), order.getItems(), order.getUser().getId());
-    }
-
     private CartResponse getCartResponse(Result<Order> response) {
         return switch (response.statusCode()) {
-            case 200 -> new CartResponse(200, toDto(response.result()));
+            case 200 -> new CartResponse(200, response.result());
             case 400 -> new CartResponse(400);
             case 401 -> new CartResponse(401);
             case 404 -> new CartResponse(404);

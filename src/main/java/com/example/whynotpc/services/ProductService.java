@@ -8,6 +8,8 @@ import com.example.whynotpc.persistence.products.ProductRepo;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -24,12 +26,7 @@ public class ProductService {
     private final ProductRepo productRepo;
     private final CategoryRepo categoryRepo;
 
-    private ProductDTO toDTO(Product product) {
-        return new ProductDTO(product.getId(), product.getTitle(), product.getPrice(),
-                product.getImgName(), product.getCategory().getName());
-    }
-
-    public Result<Product> save(ProductDTO productDTO) {
+    private Result<Product> save(ProductDTO productDTO) {
         return handleCall(() -> {
             if (isNullOrBlank(productDTO.title()) || isNullOrBlank(productDTO.category()))
                 throw new IllegalArgumentException("Some properties are null or blank");
@@ -50,8 +47,9 @@ public class ProductService {
     public ProductResponse create(ProductDTO productDTO) {
         var response = save(productDTO);
         return switch (response.statusCode()) {
-            case 200 -> new ProductResponse(201, toDTO(response.result()));
+            case 200 -> new ProductResponse(201, response.result());
             case 400 -> new ProductResponse(400);
+            case 409 -> new ProductResponse(409);
             default -> new ProductResponse(500);
         };
     }
@@ -61,6 +59,10 @@ public class ProductService {
         List<Product> savedProducts = new ArrayList<>();
         Result<Product> response;
         for (var product : products) {
+            if (productRepo.existsByTitle(product.title())) {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                return new ProductResponse(409);
+            }
             response = save(product);
             if (response.result() == null) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -68,27 +70,26 @@ public class ProductService {
             }
             savedProducts.add(response.result());
         }
-        return new ProductResponse(201, savedProducts.stream().map(this::toDTO).toList());
+        return new ProductResponse(201, savedProducts);
     }
 
     public ProductResponse readAll() {
-        return new ProductResponse(200, productRepo.findAll().stream().map(this::toDTO).toList());
+        Page<Product> products = productRepo.findAll(PageRequest.of(0, 16));
+        return new ProductResponse(200, productRepo.findAll());
     }
 
     public ProductResponse readAllByCategory(String categoryName) {
         return categoryRepo.findByName(categoryName)
                 .map(category -> new ProductResponse(
                         200,
-                        productRepo.findAllByCategory(category).stream()
-                                .map(this::toDTO)
-                                .toList())
+                        productRepo.findAllByCategory(category))
                 )
                 .orElse(new ProductResponse(400));
     }
 
     public ProductResponse read(Integer id) {
         return productRepo.findById(id)
-                .map(product -> new ProductResponse(200, toDTO(product)))
+                .map(product -> new ProductResponse(200, product))
                 .orElse(new ProductResponse(404));
     }
 
@@ -107,11 +108,16 @@ public class ProductService {
             return product;
         });
         return switch (response.statusCode()) {
-            case 200 -> new ProductResponse(200, toDTO(response.result()));
+            case 200 -> new ProductResponse(200, response.result());
             case 400 -> new ProductResponse(400);
             case 404 -> new ProductResponse(404);
             default -> new ProductResponse(500);
         };
+    }
+
+    public ProductResponse deleteAll() {
+        productRepo.deleteAll();
+        return new ProductResponse(204);
     }
 
     public ProductResponse delete(Integer id) {
@@ -126,10 +132,5 @@ public class ProductService {
             case 404 -> new ProductResponse(404);
             default -> new ProductResponse(500);
         };
-    }
-
-    public ProductResponse deleteAll() {
-        productRepo.deleteAll();
-        return new ProductResponse(204);
     }
 }

@@ -8,7 +8,6 @@ import com.example.whynotpc.utils.JPACallHandler.Result;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,7 +42,6 @@ public class ImageService {
         var response = save(file);
         return switch (response.statusCode()) {
             case 200 -> new ImageResponse(201, response.result());
-            case 400 -> new ImageResponse(400);
             case 409 -> new ImageResponse(409);
             default -> new ImageResponse(500);
         };
@@ -51,7 +49,7 @@ public class ImageService {
 
     @Transactional
     public ImageResponse create(MultipartFile[] files) {
-        List<Image> savedProducts = new ArrayList<>();
+        List<Image> savedImages = new ArrayList<>();
         Result<Image> response;
         for (var file : files) {
             if (imageRepo.existsByName(file.getOriginalFilename())) {
@@ -63,9 +61,9 @@ public class ImageService {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return new ImageResponse(response.statusCode());
             }
-            savedProducts.add(response.result());
+            savedImages.add(response.result());
         }
-        return new ImageResponse(201, savedProducts);
+        return new ImageResponse(201, savedImages);
     }
 
     public byte[] read(String filename) throws DataFormatException, IOException {
@@ -75,7 +73,33 @@ public class ImageService {
         return null;
     }
 
-    public ImageResponse delete() {
+    public ImageResponse readAll() {
+        return new ImageResponse(200, imageRepo.findAll());
+    }
+
+    public ImageResponse update(MultipartFile file, String filename) {
+        var response = handleCall(() -> {
+            var image = imageRepo.findByName(filename).orElseThrow(EntityNotFoundException::new);
+            try {
+                return imageRepo.save(Image.builder()
+                        .id(image.getId())
+                        .name(file.getOriginalFilename())
+                        .type(file.getContentType())
+                        .imageData(ImageUtils.compressImage(file.getBytes()))
+                        .build());
+            } catch (IOException e) {
+                throw new RuntimeException();
+            }
+        });
+        return switch (response.statusCode()) {
+            case 200 -> new ImageResponse(200, response.result());
+            case 404 -> new ImageResponse(404);
+            case 409 -> new ImageResponse(409);
+            default -> new ImageResponse(500);
+        };
+    }
+
+    public ImageResponse deleteAll() {
         imageRepo.deleteAll();
         return new ImageResponse(204);
     }

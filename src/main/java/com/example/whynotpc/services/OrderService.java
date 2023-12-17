@@ -1,8 +1,5 @@
 package com.example.whynotpc.services;
 
-import com.example.whynotpc.models.dto.OrderDTO;
-import com.example.whynotpc.models.order.Order;
-import com.example.whynotpc.models.order.OrderStatus;
 import com.example.whynotpc.models.response.OrderResponse;
 import com.example.whynotpc.models.users.User;
 import com.example.whynotpc.persistence.orders.OrderRepo;
@@ -13,8 +10,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 import static com.example.whynotpc.models.order.OrderStatus.CART;
 import static com.example.whynotpc.utils.JPACallHandler.handleCall;
 
@@ -24,27 +19,19 @@ public class OrderService {
     private final OrderRepo orderRepo;
     private final UserRepo userRepo;
 
-    private OrderDTO toDto(Order order) {
-        return new OrderDTO(order.getId(), order.getStatus().name(),
-                order.getTotal(), order.getItems(), order.getUser().getId());
-    }
-
-    public List<OrderDTO> readAll() {
-        return orderRepo.findAll().stream().map(this::toDto).toList();
+    public OrderResponse readAll() {
+        return new OrderResponse(200, orderRepo.findAll());
     }
 
     public OrderResponse read(Integer id) {
         return orderRepo.findById(id)
-                .map(order -> new OrderResponse(200, toDto(order)))
+                .map(order -> new OrderResponse(200, order))
                 .orElse(new OrderResponse(404));
     }
 
     public OrderResponse readByUserId(Integer id) {
         return userRepo.findById(id)
-                .map(user -> new OrderResponse(200, orderRepo.findByUserId(user.getId()).stream()
-                        .map(this::toDto)
-                        .toList())
-                )
+                .map(user -> new OrderResponse(200, orderRepo.findByUserId(user.getId())))
                 .orElse(new OrderResponse(404));
     }
 

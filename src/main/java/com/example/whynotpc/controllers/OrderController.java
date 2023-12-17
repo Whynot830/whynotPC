@@ -19,8 +19,8 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping
-    public ResponseEntity<List<OrderDTO>> readAll() {
-        return ResponseEntity.ok(orderService.readAll());
+    public ResponseEntity<OrderResponse> readAll() {
+        return handleServiceCall(orderService::readAll);
     }
 
     @GetMapping("/{id}")

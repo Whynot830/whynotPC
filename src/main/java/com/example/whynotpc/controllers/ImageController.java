@@ -32,15 +32,23 @@ public class ImageController {
     public ResponseEntity<ImageResponse> create(@RequestParam MultipartFile[] files) {
         return handleServiceCall(() -> imageService.create(files));
     }
+    @GetMapping
+    public ResponseEntity<ImageResponse> readAll() {
+        return handleServiceCall(imageService::readAll);
+    }
     @GetMapping("/{name}")
     public ResponseEntity<?> read(@PathVariable String name) throws DataFormatException, IOException {
         byte[] imageData = imageService.read(name);
         return imageData != null ? ResponseEntity.status(OK).contentType(MediaType.IMAGE_PNG).body(imageData)
                 : ResponseEntity.notFound().build();
     }
+    @PatchMapping("/{name}")
+    public ResponseEntity<ImageResponse> update(@RequestParam MultipartFile file, @PathVariable String name) {
+        return handleServiceCall(() -> imageService.update(file, name));
+    }
     @DeleteMapping
-    public ResponseEntity<ImageResponse> delete() {
-        return handleServiceCall(imageService::delete);
+    public ResponseEntity<ImageResponse> deleteAll() {
+        return handleServiceCall(imageService::deleteAll);
     }
 
     @DeleteMapping("/{name}")
