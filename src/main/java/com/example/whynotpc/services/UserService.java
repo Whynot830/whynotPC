@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -55,7 +56,7 @@ public class UserService {
 
             orderRepo.save(Order.builder()
                     .status(CART)
-                    .total(0.0f)
+                    .total(BigDecimal.valueOf(0))
                     .items(Collections.emptyList())
                     .user(savedUser)
                     .build());

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Data
 @Entity
 @Builder
@@ -15,30 +17,36 @@ public class OrderItem {
     @Id
     @GeneratedValue
     private Integer id;
+
     private Integer quantity;
+
     @ManyToOne
     private Product product;
+
+    private BigDecimal total;
+
     @JsonIgnore
     @ToString.Exclude
     @ManyToOne
     private Order order;
 
-    public Float getTotal() {
-        return quantity * product.getPrice() * 100.0f / 100.0f;
-    }
-
     @PostUpdate
     @PostPersist
-    private void postPersistOrRemove() {
-        if (order != null) {
-            order.recalculateTotal();
-        }
+    private void postPersistOrUpdate() {
+        recalculateTotal();
     }
+
     @PreRemove
     private void preRemove() {
         if (order != null) {
             order.getItems().remove(this);
             order.recalculateTotal();
         }
+    }
+
+    public void recalculateTotal() {
+        total = product.getPrice().multiply(BigDecimal.valueOf(quantity));
+        if (order != null)
+            order.recalculateTotal();
     }
 }

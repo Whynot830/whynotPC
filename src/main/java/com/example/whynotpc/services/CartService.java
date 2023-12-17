@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 
 import static com.example.whynotpc.models.order.OrderStatus.CART;
@@ -65,7 +66,7 @@ public class CartService {
             cart.setStatus(COMPLETED);
             return orderRepo.save(Order.builder()
                     .status(CART)
-                    .total(0.0f)
+                    .total(BigDecimal.valueOf(0))
                     .items(Collections.emptyList())
                     .user(user)
                     .build());

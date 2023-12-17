@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -17,16 +18,26 @@ public class Product {
     @Id
     @GeneratedValue
     private Integer id;
-    @Column(nullable = false)
+
     private String title;
-    @Column(nullable = false)
-    private Float price;
+
+    private BigDecimal price;
+
     private String imgName;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+
     @JsonIgnore
     @ToString.Exclude
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
+
+    @PostUpdate
+    protected void postUpdate() {
+        for (OrderItem orderItem : orderItems) {
+            orderItem.recalculateTotal();
+        }
+    }
 }

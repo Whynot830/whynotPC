@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Data
@@ -17,10 +19,11 @@ public class Order {
     @Id
     @GeneratedValue
     private Integer id;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    private Float total;
+    private BigDecimal total;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items;
@@ -32,6 +35,9 @@ public class Order {
     public User user;
 
     public void recalculateTotal() {
-        this.total = (float) items.stream().mapToDouble(OrderItem::getTotal).sum() * 100.0f / 100.0f;
+        total = items.stream()
+                .map(OrderItem::getTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 }

@@ -3,6 +3,7 @@ package com.example.whynotpc.services;
 import com.example.whynotpc.models.dto.ProductDTO;
 import com.example.whynotpc.models.product.Product;
 import com.example.whynotpc.models.response.ProductResponse;
+import com.example.whynotpc.persistence.orders.OrderItemRepo;
 import com.example.whynotpc.persistence.products.CategoryRepo;
 import com.example.whynotpc.persistence.products.ProductRepo;
 import jakarta.persistence.EntityNotFoundException;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,14 +27,15 @@ import static com.example.whynotpc.utils.StrChecker.isNullOrBlank;
 public class ProductService {
     private final ProductRepo productRepo;
     private final CategoryRepo categoryRepo;
+    private final OrderItemRepo orderItemRepo;
 
     private Result<Product> save(ProductDTO productDTO) {
         return handleCall(() -> {
-            if (isNullOrBlank(productDTO.title()) || isNullOrBlank(productDTO.category()))
+            if (isNullOrBlank(productDTO.title()) || isNullOrBlank(productDTO.category()) || productDTO.price() == null)
                 throw new IllegalArgumentException("Some properties are null or blank");
 
-            if (productDTO.price() < 0)
-                throw new IllegalArgumentException("Price must be non-negative");
+            if (productDTO.price().compareTo(BigDecimal.ZERO) < 0)
+                throw new IllegalArgumentException("Price must be a non-negative value");
 
             var category = categoryRepo.findByName(productDTO.category()).orElseThrow(IllegalArgumentException::new);
             return productRepo.save(Product.builder()
@@ -66,7 +69,7 @@ public class ProductService {
             response = save(product);
             if (response.result() == null) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                return new ProductResponse(400);
+                return new ProductResponse(response.statusCode());
             }
             savedProducts.add(response.result());
         }
@@ -93,19 +96,21 @@ public class ProductService {
                 .orElse(new ProductResponse(404));
     }
 
-    @Transactional
     public ProductResponse update(Integer id, ProductDTO newProduct) {
         var response = handleCall(() -> {
             var product = productRepo.findById(id).orElseThrow(EntityNotFoundException::new);
             var category = categoryRepo.findByName(newProduct.category()).orElse(null);
-            if (newProduct.category() != null && category == null || newProduct.price() != null && newProduct.price() <= 0)
+            if (newProduct.category() != null && category == null)
                 throw new IllegalArgumentException("Category with given name not found");
-
+            if (newProduct.price() != null && newProduct.price().compareTo(BigDecimal.ZERO) < 0)
+                throw new IllegalArgumentException("Price must be a non-negative value");
             if (!isNullOrBlank(newProduct.title())) product.setTitle(newProduct.title());
             if (newProduct.price() != null) product.setPrice(newProduct.price());
             if (!isNullOrBlank(newProduct.imgName())) product.setImgName(newProduct.imgName());
             if (!isNullOrBlank(newProduct.category())) product.setCategory(category);
-            return product;
+            var items = product.getOrderItems();
+            orderItemRepo.saveAll(items);
+            return productRepo.save(product);
         });
         return switch (response.statusCode()) {
             case 200 -> new ProductResponse(200, response.result());
@@ -113,11 +118,6 @@ public class ProductService {
             case 404 -> new ProductResponse(404);
             default -> new ProductResponse(500);
         };
-    }
-
-    public ProductResponse deleteAll() {
-        productRepo.deleteAll();
-        return new ProductResponse(204);
     }
 
     public ProductResponse delete(Integer id) {
@@ -132,5 +132,10 @@ public class ProductService {
             case 404 -> new ProductResponse(404);
             default -> new ProductResponse(500);
         };
+    }
+
+    public ProductResponse deleteAll() {
+        productRepo.deleteAll();
+        return new ProductResponse(204);
     }
 }

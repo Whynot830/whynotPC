@@ -1,9 +1,11 @@
 package com.example.whynotpc.models.dto;
 
+import java.math.BigDecimal;
+
 public record ProductDTO(
         Integer id,
         String title,
-        Float price,
+        BigDecimal price,
         String imgName,
         String category
 ) {
