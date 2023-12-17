@@ -16,7 +16,9 @@ public class Category {
     @Id
     @GeneratedValue
     private Integer id;
+
     private String name;
+
     @JsonIgnore
     @ToString.Exclude
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)

@@ -27,6 +27,7 @@ public class OrderResponse extends BasicResponse {
     }
 
     public OrderResponse(int statusCode) {
-        this(statusCode, Collections.emptyList());
+        super(statusCode);
+        this.orders = Collections.emptyList();
     }
 }

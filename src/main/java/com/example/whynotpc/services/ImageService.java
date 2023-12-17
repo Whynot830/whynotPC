@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.DataFormatException;
 
 import static com.example.whynotpc.utils.JPACallHandler.handleCall;
@@ -28,7 +29,7 @@ public class ImageService {
         return handleCall(() -> {
             try {
                 return imageRepo.save(Image.builder()
-                        .name(file.getOriginalFilename())
+                        .name(Objects.requireNonNull(file.getOriginalFilename()).replace(' ', '_'))
                         .type(file.getContentType())
                         .imageData(ImageUtils.compressImage(file.getBytes()))
                         .build());
@@ -83,7 +84,7 @@ public class ImageService {
             try {
                 return imageRepo.save(Image.builder()
                         .id(image.getId())
-                        .name(file.getOriginalFilename())
+                        .name(Objects.requireNonNull(file.getOriginalFilename()).replace(' ', '_'))
                         .type(file.getContentType())
                         .imageData(ImageUtils.compressImage(file.getBytes()))
                         .build());

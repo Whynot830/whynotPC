@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
 
 import java.sql.Types;
 
@@ -24,10 +23,12 @@ public class Image {
     @Id
     @GeneratedValue
     private Integer id;
+
     private String name;
+
     private String type;
+
     @Lob
     @JdbcTypeCode(Types.LONGVARBINARY)
     private byte[] imageData;
-
 }

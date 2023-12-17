@@ -42,11 +42,6 @@ public class ProductController {
         return handleServiceCall(() -> productService.read(id));
     }
 
-    @DeleteMapping()
-    public ResponseEntity<ProductResponse> deleteAll() {
-        return handleServiceCall(productService::deleteAll);
-    }
-
     @PatchMapping("/{id}")
     public ResponseEntity<ProductResponse> update(@PathVariable Integer id, @RequestBody ProductDTO newProduct) {
         return handleServiceCall(() -> productService.update(id, newProduct));
@@ -55,5 +50,10 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ProductResponse> delete(@PathVariable Integer id) {
         return handleServiceCall(() -> productService.delete(id));
+    }
+
+    @DeleteMapping()
+    public ResponseEntity<ProductResponse> deleteAll() {
+        return handleServiceCall(productService::deleteAll);
     }
 }

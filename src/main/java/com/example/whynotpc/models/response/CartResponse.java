@@ -19,6 +19,7 @@ public class CartResponse extends BasicResponse {
     }
 
     public CartResponse(int statusCode) {
-        this(statusCode, null);
+        super(statusCode);
+        this.cart = null;
     }
 }

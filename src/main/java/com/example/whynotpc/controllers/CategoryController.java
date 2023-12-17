@@ -41,7 +41,7 @@ public class CategoryController {
     }
 
     @DeleteMapping
-    public ResponseEntity<CategoryResponse> delete() {
+    public ResponseEntity<CategoryResponse> deleteAll() {
         return handleServiceCall(categoryService::deleteAll);
     }
 }
