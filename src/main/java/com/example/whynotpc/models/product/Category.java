@@ -2,13 +2,15 @@ package com.example.whynotpc.models.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
 @Data
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "categories", uniqueConstraints = {@UniqueConstraint(columnNames = "name")})
 public class Category {
     @Id
