@@ -26,8 +26,11 @@ public class OrderResponse extends BasicResponse {
         this.orders = Collections.singletonList(toDto(order));
     }
 
-    public OrderResponse(int statusCode) {
-        super(statusCode);
-        this.orders = Collections.emptyList();
+    public static OrderResponse ok(List<Order> orders) {
+        return new OrderResponse(200, orders);
+    }
+
+    public static OrderResponse ok(Order order) {
+        return new OrderResponse(200, order);
     }
 }

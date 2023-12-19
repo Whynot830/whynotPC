@@ -29,4 +29,22 @@ public class ImageResponse extends BasicResponse {
         super(statusCode);
         this.images = Collections.emptyList();
     }
+
+    public static ImageResponse ok(List<Image> images) {
+        return new ImageResponse(200, images);
+    }
+
+    public static ImageResponse ok(Image image) {
+        return new ImageResponse(200, image);
+    }
+
+    public static ImageResponse created(List<Image> images) {
+        return new ImageResponse(201, images);
+
+    }
+
+    public static ImageResponse created(Image image) {
+        return new ImageResponse(201, image);
+
+    }
 }

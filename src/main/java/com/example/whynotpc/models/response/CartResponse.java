@@ -18,8 +18,7 @@ public class CartResponse extends BasicResponse {
         this.cart = toDto(cart);
     }
 
-    public CartResponse(int statusCode) {
-        super(statusCode);
-        this.cart = null;
+    public static CartResponse ok(Order cart) {
+        return new CartResponse(200, cart);
     }
 }

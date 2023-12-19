@@ -26,8 +26,19 @@ public class ProductResponse extends BasicResponse {
         this.products = Collections.singletonList(toDTO(product));
     }
 
-    public ProductResponse(int statusCode) {
-        super(statusCode);
-        this.products = Collections.emptyList();
+    public static ProductResponse ok(List<Product> products) {
+        return new ProductResponse(200, products);
+    }
+
+    public static ProductResponse ok(Product product) {
+        return new ProductResponse(200, product);
+    }
+
+    public static ProductResponse created(List<Product> products) {
+        return new ProductResponse(201, products);
+    }
+
+    public static ProductResponse created(Product product) {
+        return new ProductResponse(201, product);
     }
 }

@@ -16,10 +16,19 @@ public class CategoryResponse extends BasicResponse {
     }
 
     public CategoryResponse(int statusCode, Category category) {
-        this(statusCode, Collections.singletonList(category));
+        super(statusCode);
+        this.categories = Collections.singletonList(category);
     }
 
-    public CategoryResponse(int statusCode) {
-        this(statusCode, Collections.emptyList());
+    public static CategoryResponse ok(List<Category> categories) {
+        return new CategoryResponse(200, categories);
+    }
+
+    public static CategoryResponse ok(Category category) {
+        return new CategoryResponse(200, category);
+    }
+
+    public static CategoryResponse created(Category category) {
+        return new CategoryResponse(201, category);
     }
 }

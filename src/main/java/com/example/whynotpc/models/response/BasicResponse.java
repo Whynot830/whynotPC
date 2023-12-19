@@ -9,4 +9,8 @@ import lombok.Data;
 public class BasicResponse {
     @JsonIgnore
     private final int statusCode;
+
+    public static BasicResponse noContent() {
+        return new BasicResponse(204);
+    }
 }
