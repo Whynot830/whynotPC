@@ -27,10 +27,9 @@ public class SecurityConfig {
             "/api/products/**",
             "/api/categories/**",
             "/api/orders/current-user",
-            "/api/images/**",
-            "/api/cart/**"
+            "/api/images/**"
     };
-    private final String[] WHITE_LIST = {"/api/auth/**"};
+    private final String[] WHITE_LIST = {"/api/auth/**", "/api/cart/**"};
     private final String[] ADMIN_LIST = {
             "/api/users/**",
             "/api/products/**",

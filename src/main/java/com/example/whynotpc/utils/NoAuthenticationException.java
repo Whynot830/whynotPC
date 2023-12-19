@@ -5,6 +5,6 @@ public class NoAuthenticationException extends RuntimeException {
         super(message);
     }
     public NoAuthenticationException() {
-        this("");
+        this("No authentication");
     }
 }

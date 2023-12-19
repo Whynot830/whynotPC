@@ -1,15 +1,13 @@
 package com.example.whynotpc.controllers;
 
-import com.example.whynotpc.models.response.CartResponse;
+import com.example.whynotpc.models.response.BasicResponse;
 import com.example.whynotpc.services.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-
-import static com.example.whynotpc.utils.ResponseHandler.handleServiceCall;
+import static com.example.whynotpc.utils.ServiceCallHandler.getResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,34 +17,34 @@ public class CartController {
     private final CartService cartService;
 
     @GetMapping
-    public ResponseEntity<CartResponse> read(Authentication authentication) {
-        return handleServiceCall(() -> cartService.read(authentication));
+    public ResponseEntity<? extends BasicResponse> read(Authentication authentication) {
+        return getResponse(() -> cartService.read(authentication));
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<CartResponse> checkOut(Authentication authentication) {
-        return handleServiceCall(() -> cartService.checkOut(authentication));
+    public ResponseEntity<? extends BasicResponse> checkOut(Authentication authentication) {
+        return getResponse(() -> cartService.checkOut(authentication));
     }
 
     @PostMapping(value = "/items", params = "productId")
-    public ResponseEntity<CartResponse> addItem(Authentication authentication, @RequestParam Integer productId) {
-        return handleServiceCall(() -> cartService.addItem(productId, authentication));
+    public ResponseEntity<? extends BasicResponse> addItem(Authentication authentication, @RequestParam Long productId) {
+        return getResponse(() -> cartService.addItem(productId, authentication));
     }
 
     @PatchMapping(value = "/items/{itemId}", params = "quantity")
-    public ResponseEntity<CartResponse> updateQuantity(Authentication authentication, @PathVariable Integer itemId,
-                                                       @RequestParam Integer quantity
+    public ResponseEntity<? extends BasicResponse> updateQuantity(Authentication authentication, @PathVariable Long itemId,
+                                                                  @RequestParam Integer quantity
     ) {
-        return handleServiceCall(() -> cartService.updateItemQuantity(itemId, quantity, authentication));
+        return getResponse(() -> cartService.updateItemQuantity(itemId, quantity, authentication));
     }
 
     @DeleteMapping(value = "/items/{itemId}")
-    public ResponseEntity<CartResponse> deleteItem(Authentication authentication, @PathVariable Integer itemId) {
-        return handleServiceCall(() -> cartService.deleteItem(itemId, authentication));
+    public ResponseEntity<? extends BasicResponse> deleteItem(Authentication authentication, @PathVariable Long itemId) {
+        return getResponse(() -> cartService.deleteItem(itemId, authentication));
     }
 
     @DeleteMapping("/items")
-    public ResponseEntity<CartResponse> clear(Authentication authentication) {
-        return handleServiceCall(() -> cartService.clearCart(authentication));
+    public ResponseEntity<? extends BasicResponse> clear(Authentication authentication) {
+        return getResponse(() -> cartService.clearCart(authentication));
     }
 }

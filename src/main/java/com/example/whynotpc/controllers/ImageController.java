@@ -1,9 +1,8 @@
 package com.example.whynotpc.controllers;
 
-import com.example.whynotpc.models.response.ImageResponse;
+import com.example.whynotpc.models.response.BasicResponse;
 import com.example.whynotpc.services.ImageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,8 +10,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
-import static com.example.whynotpc.utils.ResponseHandler.handleServiceCall;
+import static com.example.whynotpc.utils.ServiceCallHandler.getResponse;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.IMAGE_PNG;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,39 +21,38 @@ public class ImageController {
     private final ImageService imageService;
 
     @PostMapping
-    public ResponseEntity<ImageResponse> create(@RequestParam MultipartFile file) {
-        return handleServiceCall(() -> imageService.create(file));
+    public ResponseEntity<? extends BasicResponse> create(@RequestParam MultipartFile file) {
+        return getResponse(() -> imageService.create(file));
     }
 
     @PostMapping("/all")
-    public ResponseEntity<ImageResponse> create(@RequestParam MultipartFile[] files) {
-        return handleServiceCall(() -> imageService.create(files));
+    public ResponseEntity<? extends BasicResponse> create(@RequestParam MultipartFile[] files) {
+        return getResponse(() -> imageService.create(files));
     }
 
     @GetMapping
-    public ResponseEntity<ImageResponse> readAll() {
-        return handleServiceCall(imageService::readAll);
+    public ResponseEntity<? extends BasicResponse> readAll() {
+        return getResponse(imageService::readAll);
     }
 
     @GetMapping("/{name}")
-    public ResponseEntity<?> read(@PathVariable String name) throws DataFormatException, IOException {
+    public ResponseEntity<byte[]> read(@PathVariable String name) throws DataFormatException, IOException {
         byte[] imageData = imageService.read(name);
-        return imageData != null ? ResponseEntity.status(OK).contentType(MediaType.IMAGE_PNG).body(imageData)
-                : ResponseEntity.notFound().build();
+        return ResponseEntity.status(OK).contentType(IMAGE_PNG).body(imageData);
     }
 
     @PatchMapping("/{name}")
-    public ResponseEntity<ImageResponse> update(@RequestParam MultipartFile file, @PathVariable String name) {
-        return handleServiceCall(() -> imageService.update(file, name));
+    public ResponseEntity<? extends BasicResponse> update(@RequestParam MultipartFile file, @PathVariable String name) {
+        return getResponse(() -> imageService.update(file, name));
     }
 
     @DeleteMapping("/{name}")
-    public ResponseEntity<ImageResponse> delete(@PathVariable String name) {
-        return handleServiceCall(() -> imageService.delete(name));
+    public ResponseEntity<? extends BasicResponse> delete(@PathVariable String name) {
+        return getResponse(() -> imageService.delete(name));
     }
 
     @DeleteMapping
-    public ResponseEntity<ImageResponse> deleteAll() {
-        return handleServiceCall(imageService::deleteAll);
+    public ResponseEntity<? extends BasicResponse> deleteAll() {
+        return getResponse(imageService::deleteAll);
     }
 }

@@ -1,7 +1,7 @@
 package com.example.whynotpc.controllers;
 
 import com.example.whynotpc.models.dto.ProductDTO;
-import com.example.whynotpc.models.response.ProductResponse;
+import com.example.whynotpc.models.response.BasicResponse;
 import com.example.whynotpc.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.example.whynotpc.utils.ResponseHandler.handleServiceCall;
+import static com.example.whynotpc.utils.ServiceCallHandler.getResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,42 +18,48 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping()
-    public ResponseEntity<ProductResponse> create(@RequestBody ProductDTO productDTO) {
-        return handleServiceCall(() -> productService.create(productDTO));
+    public ResponseEntity<? extends BasicResponse> create(@RequestBody ProductDTO productDTO) {
+        return getResponse(() -> productService.create(productDTO));
     }
 
     @PostMapping("/all")
-    public ResponseEntity<ProductResponse> create(@RequestBody List<ProductDTO> products) {
-        return handleServiceCall(() -> productService.create(products));
+    public ResponseEntity<? extends BasicResponse> create(@RequestBody List<ProductDTO> products) {
+        return getResponse(() -> productService.create(products));
     }
 
     @GetMapping
-    public ResponseEntity<ProductResponse> readAll() {
-        return handleServiceCall(productService::readAll);
+    public ResponseEntity<? extends BasicResponse> readAll() {
+        return getResponse(productService::readAll);
+    }
+
+    @GetMapping(params = "p")
+    public ResponseEntity<?> readSorting(@RequestParam Integer p) {
+        return productService.readPageable(p);
+//        return handleServiceCall(() -> productService.readPageable(p));
     }
 
     @GetMapping(params = "category")
-    public ResponseEntity<ProductResponse> readAllByCategory(@RequestParam String category) {
-        return handleServiceCall(() -> productService.readAllByCategory(category));
+    public ResponseEntity<? extends BasicResponse> readAllByCategory(@RequestParam String category) {
+        return getResponse(() -> productService.readAllByCategory(category));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> read(@PathVariable Integer id) {
-        return handleServiceCall(() -> productService.read(id));
+    public ResponseEntity<? extends BasicResponse> read(@PathVariable Long id) {
+        return getResponse(() -> productService.read(id));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ProductResponse> update(@PathVariable Integer id, @RequestBody ProductDTO newProduct) {
-        return handleServiceCall(() -> productService.update(id, newProduct));
+    public ResponseEntity<? extends BasicResponse> update(@PathVariable Long id, @RequestBody ProductDTO newProduct) {
+        return getResponse(() -> productService.update(id, newProduct));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ProductResponse> delete(@PathVariable Integer id) {
-        return handleServiceCall(() -> productService.delete(id));
+    public ResponseEntity<? extends BasicResponse> delete(@PathVariable Long id) {
+        return getResponse(() -> productService.delete(id));
     }
 
     @DeleteMapping()
-    public ResponseEntity<ProductResponse> deleteAll() {
-        return handleServiceCall(productService::deleteAll);
+    public ResponseEntity<? extends BasicResponse> deleteAll() {
+        return getResponse(productService::deleteAll);
     }
 }

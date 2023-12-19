@@ -1,16 +1,14 @@
 package com.example.whynotpc.controllers;
 
 import com.example.whynotpc.models.dto.UserDTO;
-import com.example.whynotpc.models.response.UserResponse;
+import com.example.whynotpc.models.response.BasicResponse;
 import com.example.whynotpc.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-import static com.example.whynotpc.utils.ResponseHandler.handleServiceCall;
+import static com.example.whynotpc.utils.ServiceCallHandler.getResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,32 +17,32 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping()
-    public ResponseEntity<UserResponse> create(@RequestBody UserDTO userDTO) {
-        return handleServiceCall(() -> userService.create(userDTO));
+    public ResponseEntity<? extends BasicResponse> create(@RequestBody UserDTO userDTO) {
+        return getResponse(() -> userService.create(userDTO));
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> readAll() {
-        return ResponseEntity.ok(userService.readAll());
+    public ResponseEntity<? extends BasicResponse> readAll() {
+        return getResponse(userService::readAll);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> read(@PathVariable Integer id) {
-        return handleServiceCall(() -> userService.read(id));
+    public ResponseEntity<? extends BasicResponse> read(@PathVariable Long id) {
+        return getResponse(() -> userService.read(id));
     }
 
     @GetMapping("/current")
-    public ResponseEntity<UserResponse> read(Authentication authentication) {
-        return handleServiceCall(() -> userService.read(authentication));
+    public ResponseEntity<? extends BasicResponse> read(Authentication authentication) {
+        return getResponse(() -> userService.read(authentication));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<UserResponse> update(@PathVariable Integer id, @RequestBody UserDTO newUser) {
-        return handleServiceCall(() -> userService.update(id, newUser));
+    public ResponseEntity<? extends BasicResponse> update(@PathVariable Long id, @RequestBody UserDTO newUser) {
+        return getResponse(() -> userService.update(id, newUser));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<UserResponse> delete(@PathVariable Integer id) {
-        return handleServiceCall(() -> userService.delete(id));
+    public ResponseEntity<? extends BasicResponse> delete(@PathVariable Long id) {
+        return getResponse(() -> userService.delete(id));
     }
 }

@@ -1,13 +1,13 @@
 package com.example.whynotpc.controllers;
 
 import com.example.whynotpc.models.product.Category;
-import com.example.whynotpc.models.response.CategoryResponse;
+import com.example.whynotpc.models.response.BasicResponse;
 import com.example.whynotpc.services.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.example.whynotpc.utils.ResponseHandler.handleServiceCall;
+import static com.example.whynotpc.utils.ServiceCallHandler.getResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,32 +16,32 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<CategoryResponse> create(@RequestBody Category category) {
-        return handleServiceCall(() -> categoryService.create(category));
+    public ResponseEntity<? extends BasicResponse> create(@RequestBody Category category) {
+        return getResponse(() -> categoryService.create(category));
     }
 
     @GetMapping
-    public ResponseEntity<CategoryResponse> readAll() {
-        return handleServiceCall(categoryService::readAll);
+    public ResponseEntity<? extends BasicResponse> readAll() {
+        return getResponse(categoryService::readAll);
     }
 
     @GetMapping("/{name}")
-    public ResponseEntity<CategoryResponse> read(@PathVariable String name) {
-        return handleServiceCall(() -> categoryService.read(name));
+    public ResponseEntity<? extends BasicResponse> read(@PathVariable String name) {
+        return getResponse(() -> categoryService.read(name));
     }
 
     @PatchMapping("/{name}")
-    public ResponseEntity<CategoryResponse> update(@PathVariable String name, @RequestBody Category newCategory) {
-        return handleServiceCall(() -> categoryService.update(name, newCategory));
+    public ResponseEntity<? extends BasicResponse> update(@PathVariable String name, @RequestBody Category newCategory) {
+        return getResponse(() -> categoryService.update(name, newCategory));
     }
 
     @DeleteMapping("/{name}")
-    public ResponseEntity<CategoryResponse> delete(@PathVariable String name) {
-        return handleServiceCall(() -> categoryService.delete(name));
+    public ResponseEntity<? extends BasicResponse> delete(@PathVariable String name) {
+        return getResponse(() -> categoryService.delete(name));
     }
 
     @DeleteMapping
-    public ResponseEntity<CategoryResponse> deleteAll() {
-        return handleServiceCall(categoryService::deleteAll);
+    public ResponseEntity<? extends BasicResponse> deleteAll() {
+        return getResponse(categoryService::deleteAll);
     }
 }
