@@ -18,7 +18,7 @@ import java.util.List;
 public class Order {
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;

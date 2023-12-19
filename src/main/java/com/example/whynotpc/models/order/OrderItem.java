@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 public class OrderItem {
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
     private Integer quantity;
 

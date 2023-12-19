@@ -14,7 +14,7 @@ import lombok.*;
 public class AccessToken {
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
     private String token;
     @JsonIgnore

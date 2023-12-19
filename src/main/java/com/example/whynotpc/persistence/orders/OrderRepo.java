@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OrderRepo extends JpaRepository<Order, Integer> {
-    List<Order> findByUserId(Integer userId);
+public interface OrderRepo extends JpaRepository<Order, Long> {
+    List<Order> findByUserId(Long userId);
 
     @Query("select o from Order o where o.user = :user and o.status = 'CART'")
     Optional<Order> findCartByUser(User user);

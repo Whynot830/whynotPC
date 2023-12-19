@@ -17,7 +17,7 @@ import java.util.List;
 public class Product {
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
     private String title;
 

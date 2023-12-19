@@ -6,10 +6,10 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record OrderDTO(
-        Integer id,
+        Long id,
         String status,
         BigDecimal total,
         List<OrderItem> items,
-        Integer userId
+        Long userId
 ) {
 }

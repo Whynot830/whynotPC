@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 
 public record UserDTO(
-        Integer id,
+        Long id,
         String firstname,
         String lastname,
         String username,
@@ -24,7 +24,7 @@ public record UserDTO(
         this(null, firstname, lastname, username, email, password, role, createdAt);
     }
 
-    public UserDTO(Integer id, String firstname, String lastname, String username,
+    public UserDTO(Long id, String firstname, String lastname, String username,
                    String email, String role, LocalDateTime createdAt
     ) {
         this(id, firstname, lastname, username, email, null, role, createdAt);

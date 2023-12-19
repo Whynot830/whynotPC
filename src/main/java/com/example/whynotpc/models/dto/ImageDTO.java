@@ -1,7 +1,7 @@
 package com.example.whynotpc.models.dto;
 
 public record ImageDTO(
-        Integer id,
+        Long id,
         String name,
         String type
 ) {

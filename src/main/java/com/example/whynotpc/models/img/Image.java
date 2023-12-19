@@ -22,7 +22,7 @@ import java.sql.Types;
 public class Image {
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
     private String name;
 
