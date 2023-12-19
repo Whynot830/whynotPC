@@ -7,8 +7,8 @@ import com.example.whynotpc.models.users.User;
 import com.example.whynotpc.persistence.orders.OrderItemRepo;
 import com.example.whynotpc.persistence.orders.OrderRepo;
 import com.example.whynotpc.persistence.products.ProductRepo;
-import com.example.whynotpc.utils.JPACallHandler.Result;
 import com.example.whynotpc.utils.NoAuthenticationException;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -19,7 +19,7 @@ import java.util.Collections;
 
 import static com.example.whynotpc.models.order.OrderStatus.CART;
 import static com.example.whynotpc.models.order.OrderStatus.COMPLETED;
-import static com.example.whynotpc.utils.JPACallHandler.handleCall;
+import static com.example.whynotpc.models.response.CartResponse.ok;
 
 @Service
 @RequiredArgsConstructor
@@ -32,101 +32,110 @@ public class CartService {
     private User getUser(Authentication authentication) {
         if (authentication == null)
             throw new NoAuthenticationException();
+
         return (User) authentication.getPrincipal();
     }
 
     private Order getCart(Authentication authentication) {
         var user = getUser(authentication);
-        return orderRepo.findCartByUser(user).orElseThrow(IllegalArgumentException::new);
-    }
-
-    private CartResponse getCartResponse(Result<Order> response) {
-        return switch (response.statusCode()) {
-            case 200 -> new CartResponse(200, response.result());
-            case 400 -> new CartResponse(400);
-            case 401 -> new CartResponse(401);
-            case 404 -> new CartResponse(404);
-            default -> new CartResponse(500);
-        };
+        return orderRepo.findCartByUser(user).orElseThrow(IllegalStateException::new);
     }
 
     public CartResponse read(Authentication authentication) {
-        var response = handleCall(() -> getCart(authentication));
-        return getCartResponse(response);
+        return ok(getCart(authentication));
     }
 
     public CartResponse checkOut(Authentication authentication) {
-        var response = handleCall(() -> {
-            var cart = getCart(authentication);
-            var user = getUser(authentication);
+        var cart = getCart(authentication);
+        var user = cart.user;
 
-            if (cart.getItems().isEmpty())
-                throw new IllegalStateException("Checking out with an empty cart is not allowed");
+        var items = cart.getItems();
+        if (items.isEmpty())
+            throw new IllegalStateException("Checking out with an empty cart is not allowed");
 
-            cart.setStatus(COMPLETED);
-            return orderRepo.save(Order.builder()
-                    .status(CART)
-                    .total(BigDecimal.valueOf(0))
-                    .items(Collections.emptyList())
-                    .user(user)
-                    .build());
-        });
-        return getCartResponse(response);
+        StringBuilder sb = new StringBuilder();
+        sb
+                .append("<div style=\"display: flex; align-content: center; flex-direction: column; gap: 0.5rem; width: 100%\">")
+                .append("<h2>Congratulations, you've confirmed your order!</h2>")
+                .append("<table style=\"sp\">")
+                .append("<thead><tr>")
+                .append("<th colspan=\"4\"><h3>Ordered items</h3></th>")
+                .append("</tr></thead>");
+
+        for (var item : items) {
+            var product = item.getProduct();
+            sb
+                    .append("<tr>")
+                    .append("<td style=\"padding: 0; width: 50%\"><h4 style=\"margin: 8px 0\">").append(product.getTitle()).append("</h4></td>")
+                    .append("<td style=\"padding: 0\"><h4 style=\"margin: 8px 0\">").append(product.getCategory().getName().toUpperCase()).append("</h4></td>")
+                    .append("<td style=\"padding: 0\"><h4 style=\"margin: 8px 0\">").append(item.getQuantity()).append(" pcs.</h4></td>")
+                    .append("<td style=\"padding: 0\"><h4 style=\"margin: 8px 0\">USD $ ").append(product.getPrice()).append("</h4></td>")
+                    .append("</tr>");
+        }
+        sb.append("</tbody></table>")
+                .append("<h3>Total: USD $ ").append(cart.getTotal()).append("</h3>")
+                .append("<h4>Best regards,<br/>WHYNOTPC</h4></div>");
+
+        try {
+            emailService.sendMail(user.getEmail(), sb.toString());
+        } catch (MessagingException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        cart.setStatus(COMPLETED);
+        cart = orderRepo.save(Order.builder()
+                .status(CART)
+                .total(BigDecimal.valueOf(0))
+                .items(Collections.emptyList())
+                .user(user)
+                .build());
+
+        return ok(cart);
     }
 
-    public CartResponse addItem(Integer productId, Authentication authentication) {
-        var response = handleCall(() -> {
-            var cart = getCart(authentication);
-            var product = productRepo.findById(productId).orElseThrow(EntityNotFoundException::new);
-            var item = orderItemRepo.findByOrderIdAndProductId(cart.getId(), productId);
+    public CartResponse addItem(Long productId, Authentication authentication) {
+        var cart = getCart(authentication);
+        var product = productRepo.findById(productId).orElseThrow(EntityNotFoundException::new);
+        var item = orderItemRepo.findByOrderIdAndProductId(cart.getId(), productId);
 
-            if (item != null) item.setQuantity(item.getQuantity() + 1);
-            else item = OrderItem.builder().quantity(1).product(product).order(cart).build();
+        if (item != null) item.setQuantity(item.getQuantity() + 1);
+        else item = OrderItem.builder().quantity(1).product(product).order(cart).build();
 
-            orderItemRepo.save(item);
+        orderItemRepo.save(item);
+        orderRepo.save(cart);
 
-            return orderRepo.save(cart);
-        });
-        return getCartResponse(response);
+        return ok(cart);
     }
 
 
-    public CartResponse updateItemQuantity(Integer itemId, Integer quantity, Authentication authentication) {
-        var response = handleCall(() -> {
-            var cart = getCart(authentication);
-            var item = orderItemRepo.findById(itemId).orElseThrow(EntityNotFoundException::new);
+    public CartResponse updateItemQuantity(Long itemId, Integer quantity, Authentication authentication) {
+        var cart = getCart(authentication);
+        var item = orderItemRepo.findById(itemId).orElseThrow(EntityNotFoundException::new);
 
-            if (quantity < 1)
-                throw new IllegalArgumentException("Quantity must be greater than zero");
+        if (quantity < 1)
+            throw new IllegalArgumentException("Quantity must be greater than zero");
 
-            item.setQuantity(quantity);
-            orderItemRepo.save(item);
+        item.setQuantity(quantity);
+        orderItemRepo.save(item);
+        orderRepo.save(cart);
 
-            return orderRepo.save(cart);
-        });
-        return getCartResponse(response);
+        return ok(cart);
     }
 
-    public CartResponse deleteItem(Integer itemId, Authentication authentication) {
-        var response = handleCall(() -> {
-            var cart = getCart(authentication);
-            var item = orderItemRepo.findById(itemId).orElseThrow(EntityNotFoundException::new);
-            orderItemRepo.delete(item);
+    public CartResponse deleteItem(Long itemId, Authentication authentication) {
+        var cart = getCart(authentication);
+        var item = orderItemRepo.findById(itemId).orElseThrow(EntityNotFoundException::new);
+        orderItemRepo.delete(item);
 
-            return cart;
-        });
-        return getCartResponse(response);
+        return ok(cart);
     }
 
     public CartResponse clearCart(Authentication authentication) {
-        var response = handleCall(() -> {
-            var cart = getCart(authentication);
-            var items = cart.getItems();
-            cart.setItems(Collections.emptyList());
-            orderItemRepo.deleteAll(items);
+        var cart = getCart(authentication);
+        var items = cart.getItems();
+        cart.setItems(Collections.emptyList());
+        orderItemRepo.deleteAll(items);
 
-            return cart;
-        });
-        return getCartResponse(response);
+        return ok(cart);
     }
 }
