@@ -31,4 +31,8 @@ public class CategoryResponse extends BasicResponse {
     public static CategoryResponse created(Category category) {
         return new CategoryResponse(201, category);
     }
+
+    public static CategoryResponse created(List<Category> categories) {
+        return new CategoryResponse(201, categories);
+    }
 }
