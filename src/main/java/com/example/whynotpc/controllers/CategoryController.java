@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static com.example.whynotpc.utils.ServiceCallHandler.getResponse;
 
 @RestController
@@ -16,8 +18,16 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<? extends BasicResponse> create(@RequestBody Category category) {
+    public ResponseEntity<? extends BasicResponse> create(@RequestBody(required = false) Category category) {
         return getResponse(() -> categoryService.create(category));
+    }
+
+    @PostMapping(params = "multiple")
+    public ResponseEntity<? extends BasicResponse> create(
+            @RequestBody List<Category> categories,
+            @RequestParam(name = "multiple") String ignored
+    ) {
+        return getResponse(() -> categoryService.create(categories));
     }
 
     @GetMapping
@@ -31,7 +41,10 @@ public class CategoryController {
     }
 
     @PatchMapping("/{name}")
-    public ResponseEntity<? extends BasicResponse> update(@PathVariable String name, @RequestBody Category newCategory) {
+    public ResponseEntity<? extends BasicResponse> update(
+            @PathVariable String name,
+            @RequestBody Category newCategory
+    ) {
         return getResponse(() -> categoryService.update(name, newCategory));
     }
 

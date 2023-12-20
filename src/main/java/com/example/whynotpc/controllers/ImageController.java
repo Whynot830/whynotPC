@@ -25,8 +25,9 @@ public class ImageController {
         return getResponse(() -> imageService.create(file));
     }
 
-    @PostMapping("/all")
-    public ResponseEntity<? extends BasicResponse> create(@RequestParam MultipartFile[] files) {
+    @PostMapping(params = "multiple")
+    public ResponseEntity<? extends BasicResponse> create(@RequestParam MultipartFile[] files,
+                                                          @RequestParam(name = "multiple") String ignored) {
         return getResponse(() -> imageService.create(files));
     }
 

@@ -8,7 +8,6 @@ import com.example.whynotpc.utils.ImageUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,13 +46,10 @@ public class ImageService {
     @Transactional
     public ImageResponse create(MultipartFile[] files) {
         List<Image> savedImages = new ArrayList<>();
-        Image image;
+        Image savedImage;
         for (var file : files) {
-            if (imageRepo.existsByName(file.getOriginalFilename()))
-                throw new DataIntegrityViolationException("File with name '" + file.getOriginalFilename() + "' already exists");
-
-            image = save(file);
-            savedImages.add(image);
+            savedImage = save(file);
+            savedImages.add(savedImage);
         }
         return created(savedImages);
     }

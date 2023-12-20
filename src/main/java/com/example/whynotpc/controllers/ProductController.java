@@ -22,8 +22,9 @@ public class ProductController {
         return getResponse(() -> productService.create(productDTO));
     }
 
-    @PostMapping("/all")
-    public ResponseEntity<? extends BasicResponse> create(@RequestBody List<ProductDTO> products) {
+    @PostMapping(params = "multiple")
+    public ResponseEntity<? extends BasicResponse> create(@RequestBody List<ProductDTO> products,
+                                                          @RequestParam(name = "multiple") String ignored) {
         return getResponse(() -> productService.create(products));
     }
 

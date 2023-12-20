@@ -10,7 +10,6 @@ import com.example.whynotpc.persistence.products.ProductRepo;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -61,9 +60,6 @@ public class ProductService {
         List<Product> savedProducts = new ArrayList<>();
         Product savedProduct;
         for (var product : products) {
-            if (productRepo.existsByTitle(product.title()))
-                throw new DataIntegrityViolationException("Product with title '" + product.title() + "' already exists");
-
             savedProduct = save(product);
             savedProducts.add(savedProduct);
         }

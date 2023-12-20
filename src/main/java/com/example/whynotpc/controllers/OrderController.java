@@ -30,8 +30,11 @@ public class OrderController {
         return getResponse(() -> orderService.readByUserId(userId));
     }
 
-    @GetMapping(value = "/current-user")
-    public ResponseEntity<? extends BasicResponse> readByAuthentication(Authentication authentication) {
+    @GetMapping(params = "current-user")
+    public ResponseEntity<? extends BasicResponse> readByAuthentication(
+            Authentication authentication,
+            @RequestParam(name = "current-user") String ignored
+    ) {
         return getResponse(() -> orderService.readByAuthentication(authentication));
     }
 

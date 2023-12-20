@@ -27,12 +27,18 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<? extends BasicResponse> login(@RequestBody AuthRequest request, HttpServletResponse response) {
+    public ResponseEntity<? extends BasicResponse> login(
+            @RequestBody AuthRequest request,
+            HttpServletResponse response
+    ) {
         return getResponse(() -> authService.login(request, response));
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<? extends BasicResponse> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<? extends BasicResponse> refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
         return getResponse(() -> authService.refreshToken(request, response));
     }
 
@@ -42,8 +48,9 @@ public class AuthController {
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<? extends BasicResponse> changePassword(@RequestBody ChangePasswordRequest request,
-                                                        HttpServletRequest servletRequest
+    public ResponseEntity<? extends BasicResponse> changePassword(
+            @RequestBody ChangePasswordRequest request,
+            HttpServletRequest servletRequest
     ) {
         return getResponse(() -> authService.changePassword(request, servletRequest));
     }

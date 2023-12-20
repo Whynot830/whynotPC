@@ -67,9 +67,9 @@ public class CartService {
             sb
                     .append("<tr>")
                     .append("<td style=\"padding: 0; width: 50%\"><h4 style=\"margin: 8px 0\">").append(product.getTitle()).append("</h4></td>")
-                    .append("<td style=\"padding: 0\"><h4 style=\"margin: 8px 0\">").append(product.getCategory().getName().toUpperCase()).append("</h4></td>")
-                    .append("<td style=\"padding: 0\"><h4 style=\"margin: 8px 0\">").append(item.getQuantity()).append(" pcs.</h4></td>")
-                    .append("<td style=\"padding: 0\"><h4 style=\"margin: 8px 0\">USD $ ").append(product.getPrice()).append("</h4></td>")
+                    .append("<td style=\"padding: 0; text-align: center\"><h4 style=\"margin: 8px 0\">").append(product.getCategory().getName().toUpperCase()).append("</h4></td>")
+                    .append("<td style=\"padding: 0; text-align: center\"><h4 style=\"margin: 8px 0\">").append(item.getQuantity()).append(" pcs.</h4></td>")
+                    .append("<td style=\"padding: 0; text-align: center\"><h4 style=\"margin: 8px 0\">USD $ ").append(product.getPrice()).append("</h4></td>")
                     .append("</tr>");
         }
         sb.append("</tbody></table>")
