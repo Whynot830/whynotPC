@@ -28,14 +28,12 @@ public class CategoryService {
         return categoryRepo.save(category);
     }
     public CategoryResponse create(Category category) {
-        System.out.println("1");
         var savedCategory = save(category);
         return created(savedCategory);
     }
 
     @Transactional
     public CategoryResponse create(List<Category> categories) {
-        System.out.println("9");
         List<Category> savedCategories = new ArrayList<>();
         Category savedCategory;
         for (var category : categories) {

@@ -18,7 +18,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<? extends BasicResponse> create(@RequestBody(required = false) Category category) {
+    public ResponseEntity<? extends BasicResponse> create(@RequestBody Category category) {
         return getResponse(() -> categoryService.create(category));
     }
 
