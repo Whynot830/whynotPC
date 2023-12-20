@@ -1,6 +1,5 @@
 package com.example.whynotpc.services;
 
-import com.example.whynotpc.models.auth.AuthRequest;
 import com.example.whynotpc.models.auth.ChangePasswordRequest;
 import com.example.whynotpc.models.dto.UserDTO;
 import com.example.whynotpc.models.jwt.AccessToken;
@@ -19,6 +18,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
@@ -62,18 +62,18 @@ public class AuthService {
         accessTokenRepo.save(token);
     }
 
-    public AuthResponse register(AuthRequest request) {
-        UserDTO userDTO = new UserDTO(request.firstname(), request.lastname(), request.username(), request.email(),
-                request.password(), "USER", LocalDateTime.now());
-        userService.create(userDTO);
+    public AuthResponse register(UserDTO userDTO, MultipartFile file) {
+        UserDTO acceptedDTO = new UserDTO(userDTO.firstname(), userDTO.lastname(), userDTO.username(), userDTO.email(),
+                userDTO.password(), "USER", LocalDateTime.now());
+        userService.create(acceptedDTO, file);
         return ok();
     }
 
-    public AuthResponse login(AuthRequest request, HttpServletResponse response) {
-        String usernameOrEmail = isNullOrBlank(request.username()) ? request.email() : request.username();
+    public AuthResponse login(UserDTO userDTO, HttpServletResponse response) {
+        String usernameOrEmail = isNullOrBlank(userDTO.username()) ? userDTO.email() : userDTO.username();
         try {
             authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(usernameOrEmail, request.password()));
+                    new UsernamePasswordAuthenticationToken(usernameOrEmail, userDTO.password()));
         } catch (BadCredentialsException exception) {
             throw new NoAuthenticationException("Bad credentials");
         }

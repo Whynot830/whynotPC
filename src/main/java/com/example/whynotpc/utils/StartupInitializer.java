@@ -26,7 +26,7 @@ public class StartupInitializer implements CommandLineRunner {
     public void run(String... args) {
         try {
             userService.create(new UserDTO("why", "not", "admin",
-                    "aminfury@mail.ru", "admin", "ADMIN", LocalDateTime.now()));
+                    "aminfury@mail.ru", "admin", "ADMIN", LocalDateTime.now()), null);
         } catch (DataIntegrityViolationException ignored) {
         }
         try {

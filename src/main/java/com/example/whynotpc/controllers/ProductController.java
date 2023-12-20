@@ -6,6 +6,7 @@ import com.example.whynotpc.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -18,13 +19,18 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping()
-    public ResponseEntity<? extends BasicResponse> create(@RequestBody ProductDTO productDTO) {
-        return getResponse(() -> productService.create(productDTO));
+    public ResponseEntity<? extends BasicResponse> create(
+            @RequestPart ProductDTO productDTO,
+            @RequestPart(required = false) MultipartFile file
+    ) {
+        return getResponse(() -> productService.create(productDTO, file));
     }
 
     @PostMapping(params = "multiple")
-    public ResponseEntity<? extends BasicResponse> create(@RequestBody List<ProductDTO> products,
-                                                          @RequestParam(name = "multiple") String ignored) {
+    public ResponseEntity<? extends BasicResponse> create(
+            @RequestBody List<ProductDTO> products,
+            @RequestParam(name = "multiple") String ignored
+    ) {
         return getResponse(() -> productService.create(products));
     }
 
@@ -50,8 +56,12 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<? extends BasicResponse> update(@PathVariable Long id, @RequestBody ProductDTO newProduct) {
-        return getResponse(() -> productService.update(id, newProduct));
+    public ResponseEntity<? extends BasicResponse> update(
+            @PathVariable Long id,
+            @RequestPart(required = false) ProductDTO newProduct,
+            @RequestPart(required = false) MultipartFile file
+    ) {
+        return getResponse(() -> productService.update(id, newProduct, file));
     }
 
     @DeleteMapping("/{id}")

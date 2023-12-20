@@ -54,9 +54,17 @@ public class ImageService {
         return created(savedImages);
     }
 
-    public byte[] read(String filename) throws DataFormatException, IOException {
-        var imageData = imageRepo.findByName(filename).orElseThrow(EntityNotFoundException::new);
-        return ImageUtils.decompressImage(imageData.getImageData());
+    public Image read(String filename) {
+        return imageRepo.findByName(filename).orElse(null);
+    }
+
+    public byte[] getImage(String filename) {
+        try {
+            var imageData = imageRepo.findByName(filename).orElseThrow(EntityNotFoundException::new);
+            return ImageUtils.decompressImage(imageData.getImageData());
+        } catch (DataFormatException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ImageResponse readAll() {

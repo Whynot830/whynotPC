@@ -1,17 +1,15 @@
 package com.example.whynotpc.controllers;
 
-import com.example.whynotpc.models.auth.AuthRequest;
 import com.example.whynotpc.models.auth.ChangePasswordRequest;
+import com.example.whynotpc.models.dto.UserDTO;
 import com.example.whynotpc.models.response.BasicResponse;
 import com.example.whynotpc.services.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.example.whynotpc.utils.ServiceCallHandler.getResponse;
 
@@ -22,16 +20,19 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<? extends BasicResponse> register(@RequestBody AuthRequest request) {
-        return getResponse(() -> authService.register(request));
+    public ResponseEntity<? extends BasicResponse> register(
+            @RequestPart UserDTO userDTO,
+            @RequestPart(required = false) MultipartFile file
+    ) {
+        return getResponse(() -> authService.register(userDTO, file));
     }
 
     @PostMapping("/login")
     public ResponseEntity<? extends BasicResponse> login(
-            @RequestBody AuthRequest request,
+            @RequestBody UserDTO userDTO,
             HttpServletResponse response
     ) {
-        return getResponse(() -> authService.login(request, response));
+        return getResponse(() -> authService.login(userDTO, response));
     }
 
     @PostMapping("/refresh-token")

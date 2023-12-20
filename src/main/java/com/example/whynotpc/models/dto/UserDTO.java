@@ -16,17 +16,18 @@ public record UserDTO(
         String role,
         @JsonFormat(pattern = "MM-dd-yyyy hh:mm a z",
                 timezone = "Europe/Moscow")
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String profilePicName
 ) {
     public UserDTO(String firstname, String lastname, String username, String email,
                    String password, String role, LocalDateTime createdAt
     ) {
-        this(null, firstname, lastname, username, email, password, role, createdAt);
+        this(null, firstname, lastname, username, email, password, role, createdAt, null);
     }
 
     public UserDTO(Long id, String firstname, String lastname, String username,
-                   String email, String role, LocalDateTime createdAt
+                   String email, String role, LocalDateTime createdAt, String getProfilePicName
     ) {
-        this(id, firstname, lastname, username, email, null, role, createdAt);
+        this(id, firstname, lastname, username, email, null, role, createdAt, getProfilePicName);
     }
 }

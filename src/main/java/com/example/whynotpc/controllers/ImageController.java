@@ -7,9 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.zip.DataFormatException;
-
 import static com.example.whynotpc.utils.ServiceCallHandler.getResponse;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.IMAGE_PNG;
@@ -26,8 +23,10 @@ public class ImageController {
     }
 
     @PostMapping(params = "multiple")
-    public ResponseEntity<? extends BasicResponse> create(@RequestParam MultipartFile[] files,
-                                                          @RequestParam(name = "multiple") String ignored) {
+    public ResponseEntity<? extends BasicResponse> create(
+            @RequestParam MultipartFile[] files,
+            @RequestParam(name = "multiple") String ignored
+    ) {
         return getResponse(() -> imageService.create(files));
     }
 
@@ -37,13 +36,16 @@ public class ImageController {
     }
 
     @GetMapping("/{name}")
-    public ResponseEntity<byte[]> read(@PathVariable String name) throws DataFormatException, IOException {
-        byte[] imageData = imageService.read(name);
+    public ResponseEntity<byte[]> getImage(@PathVariable String name) {
+        byte[] imageData = imageService.getImage(name);
         return ResponseEntity.status(OK).contentType(IMAGE_PNG).body(imageData);
     }
 
     @PatchMapping("/{name}")
-    public ResponseEntity<? extends BasicResponse> update(@RequestParam MultipartFile file, @PathVariable String name) {
+    public ResponseEntity<? extends BasicResponse> update(
+            @RequestParam MultipartFile file,
+            @PathVariable String name
+    ) {
         return getResponse(() -> imageService.update(file, name));
     }
 

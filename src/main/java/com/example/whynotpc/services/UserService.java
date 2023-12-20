@@ -15,10 +15,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -34,14 +36,21 @@ public class UserService {
     private final UserRepo userRepo;
     private final OrderRepo orderRepo;
     private final PasswordEncoder passwordEncoder;
+    private final ImageService imageService;
 
-    public UserResponse create(UserDTO userDTO) {
+    private User getUserFromAuthentication(Authentication authentication) {
+        if (authentication == null)
+            throw new NoAuthenticationException();
+        return (User) authentication.getPrincipal();
+    }
+
+    public UserResponse create(UserDTO userDTO, MultipartFile file) {
         Stream<String> values = Stream.of(userDTO.firstname(), userDTO.lastname(), userDTO.username(),
                 userDTO.email(), userDTO.password(), userDTO.role());
         if (values.anyMatch(StrChecker::isNullOrBlank))
             throw new IllegalArgumentException("Some of properties are null or blank");
 
-        var user = userRepo.save(User.builder()
+        var user = User.builder()
                 .firstname(userDTO.firstname())
                 .lastname(userDTO.lastname())
                 .username(userDTO.username())
@@ -49,7 +58,14 @@ public class UserService {
                 .password(passwordEncoder.encode(userDTO.password()))
                 .role(Role.valueOf(userDTO.role()))
                 .createdAt(LocalDateTime.now())
-                .build());
+                .build();
+
+        if (file != null) {
+            imageService.create(file);
+            String picName = Objects.requireNonNull(file.getOriginalFilename()).replace(' ', '_');
+            user.setProfilePicName(picName);
+        }
+        user = userRepo.save(user);
 
         orderRepo.save(Order.builder()
                 .status(CART)
@@ -71,18 +87,17 @@ public class UserService {
     }
 
     public UserResponse read(Authentication authentication) {
-        if (authentication == null)
-            throw new NoAuthenticationException();
-        var user = (User) authentication.getPrincipal();
+        var user = getUserFromAuthentication(authentication);
 
         return ok(user);
     }
 
-    public void update(Long id, User user) {
+    public User update(Long id, User user) {
         if (!userRepo.existsById(id))
-            return;
+            throw new EntityNotFoundException("User with id " + id + " not found");
+
         user.setId(id);
-        userRepo.save(user);
+        return userRepo.save(user);
     }
 
     public UserResponse update(Long id, UserDTO newUser) {
@@ -95,6 +110,27 @@ public class UserService {
         if (!isNullOrBlank(newUser.role())) user.setRole(Role.valueOf(newUser.role()));
         user = userRepo.save(user);
 
+        return ok(user);
+    }
+
+    public UserResponse update(Authentication authentication, UserDTO newUser, MultipartFile file) {
+        var user = getUserFromAuthentication(authentication);
+        if (newUser != null) {
+            if (!isNullOrBlank(newUser.firstname())) user.setFirstname(newUser.firstname());
+            if (!isNullOrBlank(newUser.lastname())) user.setLastname(newUser.lastname());
+            if (!isNullOrBlank(newUser.email())) user.setEmail(newUser.email());
+        }
+
+        if (file != null) {
+            var presentImage = imageService.read(user.getProfilePicName());
+
+            if (presentImage == null) imageService.create(file);
+            else imageService.update(file, presentImage.getName());
+
+            user.setProfilePicName(Objects.requireNonNull(file.getOriginalFilename()).replace(' ', '_'));
+        }
+
+        user = update(user.getId(), user);
         return ok(user);
     }
 

@@ -23,13 +23,16 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final String[] GET_WHITE_LIST = {
-            "/api/users/current",
             "/api/products/**",
             "/api/categories/**",
             "/api/orders/current-user",
             "/api/images/**"
     };
-    private final String[] WHITE_LIST = {"/api/auth/**", "/api/cart/**"};
+    private final String[] WHITE_LIST = {
+            "/api/auth/**",
+            "/api/cart/**",
+            "/api/users/current"
+    };
     private final String[] ADMIN_LIST = {
             "/api/users/**",
             "/api/products/**",

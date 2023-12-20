@@ -13,7 +13,7 @@ public class UserResponse extends BasicResponse {
 
     private UserDTO toDTO(User user) {
         return new UserDTO(user.getId(), user.getFirstname(), user.getLastname(),
-                user.getUsername(), user.getEmail(), user.getRole().name(), user.getCreatedAt());
+                user.getUsername(), user.getEmail(), user.getRole().name(), user.getCreatedAt(), user.getProfilePicName());
     }
 
     public UserResponse(int statusCode, List<User> users) {

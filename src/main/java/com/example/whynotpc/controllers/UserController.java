@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.example.whynotpc.utils.ServiceCallHandler.getResponse;
 
@@ -18,7 +19,7 @@ public class UserController {
 
     @PostMapping()
     public ResponseEntity<? extends BasicResponse> create(@RequestBody UserDTO userDTO) {
-        return getResponse(() -> userService.create(userDTO));
+        return getResponse(() -> userService.create(userDTO, null));
     }
 
     @GetMapping
@@ -37,8 +38,20 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<? extends BasicResponse> update(@PathVariable Long id, @RequestBody UserDTO newUser) {
+    public ResponseEntity<? extends BasicResponse> update(
+            @PathVariable Long id,
+            @RequestBody UserDTO newUser
+    ) {
         return getResponse(() -> userService.update(id, newUser));
+    }
+
+    @PatchMapping("/current")
+    public ResponseEntity<? extends BasicResponse> update(
+            Authentication authentication,
+            @RequestPart(required = false) UserDTO newUser,
+            @RequestPart(required = false) MultipartFile file
+    ) {
+        return getResponse(() -> userService.update(authentication, newUser, file));
     }
 
     @DeleteMapping("/{id}")

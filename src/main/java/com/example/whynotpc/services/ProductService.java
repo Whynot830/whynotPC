@@ -14,10 +14,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static com.example.whynotpc.models.response.BasicResponse.noContent;
 import static com.example.whynotpc.models.response.ProductResponse.created;
@@ -30,8 +32,8 @@ public class ProductService {
     private final ProductRepo productRepo;
     private final CategoryRepo categoryRepo;
     private final OrderItemRepo orderItemRepo;
-
-    private Product save(ProductDTO productDTO) {
+    private final ImageService imageService;
+    private Product save(ProductDTO productDTO, MultipartFile file) {
         if (isNullOrBlank(productDTO.title()) || isNullOrBlank(productDTO.category()) || productDTO.price() == null)
             throw new IllegalArgumentException("Some properties are null or blank");
 
@@ -42,16 +44,21 @@ public class ProductService {
                 .findByName(productDTO.category())
                 .orElseThrow(() -> new IllegalArgumentException("Category with given name not found"));
 
-        return productRepo.save(Product.builder()
+        var product = Product.builder()
                 .title(productDTO.title())
                 .price(productDTO.price())
-                .imgName(productDTO.imgName())
                 .category(category)
-                .build());
+                .build();
+
+        if (file != null) {
+            imageService.create(file);
+            product.setImgName(Objects.requireNonNull(file.getOriginalFilename()).replace(' ', '_'));
+        }
+        return productRepo.save(product);
     }
 
-    public ProductResponse create(ProductDTO productDTO) {
-        var product = save(productDTO);
+    public ProductResponse create(ProductDTO productDTO, MultipartFile file) {
+        var product = save(productDTO, file);
         return ok(product);
     }
 
@@ -60,7 +67,7 @@ public class ProductService {
         List<Product> savedProducts = new ArrayList<>();
         Product savedProduct;
         for (var product : products) {
-            savedProduct = save(product);
+            savedProduct = save(product, null);
             savedProducts.add(savedProduct);
         }
         return created(savedProducts);
@@ -89,20 +96,30 @@ public class ProductService {
                 .orElseThrow(EntityNotFoundException::new);
     }
 
-    public ProductResponse update(Long id, ProductDTO newProduct) {
+    public ProductResponse update(Long id, ProductDTO newProduct, MultipartFile file) {
         var product = productRepo.findById(id).orElseThrow(EntityNotFoundException::new);
-        var category = categoryRepo.findByName(newProduct.category()).orElse(null);
 
-        if (newProduct.category() != null && category == null)
-            throw new IllegalArgumentException("Category with given name not found");
-        if (newProduct.price() != null && newProduct.price().compareTo(BigDecimal.ZERO) < 0)
-            throw new IllegalArgumentException("Price must be a non-negative value");
+        System.out.println(newProduct);
+        if (newProduct != null) {
+            var category = categoryRepo.findByName(newProduct.category()).orElse(null);
+            if (newProduct.category() != null && category == null)
+                throw new IllegalArgumentException("Category with given name not found");
+            if (newProduct.price() != null && newProduct.price().compareTo(BigDecimal.ZERO) < 0)
+                throw new IllegalArgumentException("Price must be a non-negative value");
 
-        if (!isNullOrBlank(newProduct.title())) product.setTitle(newProduct.title());
-        if (newProduct.price() != null) product.setPrice(newProduct.price());
-        if (!isNullOrBlank(newProduct.imgName())) product.setImgName(newProduct.imgName());
-        if (!isNullOrBlank(newProduct.category())) product.setCategory(category);
+            if (!isNullOrBlank(newProduct.title())) product.setTitle(newProduct.title());
+            if (newProduct.price() != null) product.setPrice(newProduct.price());
+            if (!isNullOrBlank(newProduct.category())) product.setCategory(category);
+        }
 
+        if (file != null) {
+            var presentImage = imageService.read(product.getImgName());
+
+            if (presentImage == null) imageService.create(file);
+            else imageService.update(file, presentImage.getName());
+
+            product.setImgName(Objects.requireNonNull(file.getOriginalFilename()).replace(' ', '_'));
+        }
         var items = product.getOrderItems();
         orderItemRepo.saveAll(items);
         product = productRepo.save(product);
