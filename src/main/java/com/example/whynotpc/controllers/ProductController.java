@@ -35,19 +35,13 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<? extends BasicResponse> readAll() {
-        return getResponse(productService::readAll);
-    }
-
-    @GetMapping(params = "p")
-    public ResponseEntity<?> readSorting(@RequestParam Integer p) {
-        return productService.readPageable(p);
-//        return handleServiceCall(() -> productService.readPageable(p));
-    }
-
-    @GetMapping(params = "category")
-    public ResponseEntity<? extends BasicResponse> readAllByCategory(@RequestParam String category) {
-        return getResponse(() -> productService.readAllByCategory(category));
+    public ResponseEntity<? extends BasicResponse> read(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String order
+    ) {
+        return getResponse(() -> productService.read(category, page, sort, order));
     }
 
     @GetMapping("/{id}")
