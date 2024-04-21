@@ -9,6 +9,9 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class responsible for sending emails.
+ */
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -17,6 +20,13 @@ public class EmailService {
     String username;
     String subject = "Your order in WHYNOTPC shop";
 
+    /**
+     * Asynchronously sends an email with the provided body to the specified recipient.
+     *
+     * @param receiver The email address of the recipient
+     * @param body     The body of the email
+     * @throws MessagingException If an error occurs while sending the email
+     */
     @Async
     public void sendMail(String receiver, String body) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();

@@ -6,7 +6,17 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+/**
+ * Utility class for compressing and decompressing image data.
+ */
 public class ImageUtils {
+    /**
+     * Compresses the specified image data using the Deflate algorithm with the best compression level.
+     *
+     * @param data The input image data to compress.
+     * @return compressed image data.
+     * @throws IOException If an I/O error occurs.
+     */
     public static byte[] compressImage(byte[] data) throws IOException {
         Deflater deflater = new Deflater();
         deflater.setLevel(Deflater.BEST_COMPRESSION);
@@ -26,6 +36,14 @@ public class ImageUtils {
         return outputStream.toByteArray();
     }
 
+    /**
+     * Decompresses the specified compressed image data using the Inflater algorithm.
+     *
+     * @param data The input compressed image data to decompress.
+     * @return decompressed image data.
+     * @throws DataFormatException If the compressed data format is invalid.
+     * @throws IOException         If an I/O error occurs.
+     */
     public static byte[] decompressImage(byte[] data) throws DataFormatException, IOException {
         Inflater inflater = new Inflater();
         inflater.setInput(data);

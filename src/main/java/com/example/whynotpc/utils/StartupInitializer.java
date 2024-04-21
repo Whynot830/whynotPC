@@ -15,6 +15,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Initializes essential data in the application upon startup.
+ * This class implements the CommandLineRunner interface, allowing it to run
+ * its logic when the Spring Boot application starts.
+ */
 @Component
 @RequiredArgsConstructor
 public class StartupInitializer implements CommandLineRunner {
@@ -22,6 +27,12 @@ public class StartupInitializer implements CommandLineRunner {
     private final CategoryService categoryService;
     private final ProductService productService;
 
+    /**
+     * Runs the logic to initialize data upon application startup.
+     * Creates an admin user, adds a category, and adds multiple products to the storage category.
+     *
+     * @param args The command-line arguments passed to the application.
+     */
     @Override
     public void run(String... args) {
         try {

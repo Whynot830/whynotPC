@@ -13,12 +13,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 import static com.example.whynotpc.utils.ServiceCallHandler.getResponse;
 
+/**
+ * Controller class for handling authentication-related endpoints.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
 
+    /**
+     * Handles registration endpoint.
+     *
+     * @param userDTO The user DTO.
+     * @param file    The profile picture file (optional).
+     * @return ResponseEntity with a BasicResponse.
+     */
     @PostMapping("/register")
     public ResponseEntity<? extends BasicResponse> register(
             @RequestPart UserDTO userDTO,
@@ -27,6 +37,13 @@ public class AuthController {
         return getResponse(() -> authService.register(userDTO, file));
     }
 
+    /**
+     * Handles login endpoint.
+     *
+     * @param userDTO  The user DTO.
+     * @param response The HTTP response.
+     * @return ResponseEntity with a BasicResponse.
+     */
     @PostMapping("/login")
     public ResponseEntity<? extends BasicResponse> login(
             @RequestBody UserDTO userDTO,
@@ -35,6 +52,13 @@ public class AuthController {
         return getResponse(() -> authService.login(userDTO, response));
     }
 
+    /**
+     * Handles token refresh endpoint.
+     *
+     * @param request  The HTTP request.
+     * @param response The HTTP response.
+     * @return ResponseEntity with a BasicResponse.
+     */
     @PostMapping("/refresh-token")
     public ResponseEntity<? extends BasicResponse> refreshToken(
             HttpServletRequest request,
@@ -43,11 +67,24 @@ public class AuthController {
         return getResponse(() -> authService.refreshToken(request, response));
     }
 
+    /**
+     * Handles terminating other sessions endpoint.
+     *
+     * @param request The HTTP request.
+     * @return ResponseEntity with a BasicResponse.
+     */
     @PostMapping("/terminate-other")
     public ResponseEntity<? extends BasicResponse> terminateOtherSessions(HttpServletRequest request) {
         return getResponse(() -> authService.terminateOtherSessions(request));
     }
 
+    /**
+     * Handles changing password endpoint.
+     *
+     * @param request       The change password request DTO.
+     * @param servletRequest The HTTP servlet request.
+     * @return ResponseEntity with a BasicResponse.
+     */
     @PostMapping("/change-password")
     public ResponseEntity<? extends BasicResponse> changePassword(
             @RequestBody ChangePasswordRequest request,
@@ -56,6 +93,12 @@ public class AuthController {
         return getResponse(() -> authService.changePassword(request, servletRequest));
     }
 
+    /**
+     * Handles logout endpoint.
+     *
+     * @param request The HTTP request.
+     * @return ResponseEntity with a BasicResponse.
+     */
     @PostMapping("/logout")
     public ResponseEntity<? extends BasicResponse> logout(HttpServletRequest request) {
         return getResponse(() -> authService.logout(request));

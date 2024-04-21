@@ -15,7 +15,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import static org.springframework.http.HttpMethod.GET;
 
-
+/**
+ * Configuration class for security setup.
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -41,6 +43,13 @@ public class SecurityConfig {
             "/api/images/**"
     };
 
+    /**
+     * Configures security filters and rules.
+     *
+     * @param http The HttpSecurity object.
+     * @return The SecurityFilterChain object.
+     * @throws Exception If an error occurs during configuration.
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

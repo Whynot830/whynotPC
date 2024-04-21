@@ -21,6 +21,9 @@ import static com.example.whynotpc.models.order.OrderStatus.CART;
 import static com.example.whynotpc.models.order.OrderStatus.COMPLETED;
 import static com.example.whynotpc.models.response.CartResponse.ok;
 
+/**
+ * Service class handling operations related to the user's shopping cart.
+ */
 @Service
 @RequiredArgsConstructor
 public class CartService {
@@ -29,6 +32,13 @@ public class CartService {
     private final ProductRepo productRepo;
     private final OrderItemRepo orderItemRepo;
 
+    /**
+     * Retrieves the user associated with the provided authentication.
+     *
+     * @param authentication The authentication object containing user information
+     * @return user associated with the authentication
+     * @throws NoAuthenticationException If the authentication object is null
+     */
     private User getUser(Authentication authentication) {
         if (authentication == null)
             throw new NoAuthenticationException();
@@ -36,16 +46,36 @@ public class CartService {
         return (User) authentication.getPrincipal();
     }
 
+    /**
+     * Retrieves the shopping cart associated with the authenticated user.
+     *
+     * @param authentication The authentication object containing user information
+     * @return shopping cart of the authenticated user
+     * @throws IllegalStateException If the user does not have a cart
+     */
     private Order getCart(Authentication authentication) {
         var user = getUser(authentication);
         return orderRepo.findCartByUser(user).orElseThrow(IllegalStateException::new);
     }
 
+    /**
+     * Retrieves the contents of the user's shopping cart.
+     *
+     * @param authentication The authentication object containing user information
+     * @return response containing the user's shopping cart
+     */
     public CartResponse read(Authentication authentication) {
         return ok(getCart(authentication));
     }
 
-    public CartResponse checkOut(Authentication authentication) {
+    /**
+     * Processes the checkout for the user's shopping cart.
+     *
+     * @param authentication The authentication object containing user information
+     * @return response containing the completed order details
+     * @throws IllegalStateException If the cart is empty
+     */
+    public CartResponse checkout(Authentication authentication) {
         var cart = getCart(authentication);
         var user = cart.user;
 
@@ -66,14 +96,24 @@ public class CartService {
             var product = item.getProduct();
             sb
                     .append("<tr>")
-                    .append("<td style=\"padding: 0; width: 50%\"><h4 style=\"margin: 8px 0\">").append(product.getTitle()).append("</h4></td>")
-                    .append("<td style=\"padding: 0; text-align: center\"><h4 style=\"margin: 8px 0\">").append(product.getCategory().getName().toUpperCase()).append("</h4></td>")
-                    .append("<td style=\"padding: 0; text-align: center\"><h4 style=\"margin: 8px 0\">").append(item.getQuantity()).append(" pcs.</h4></td>")
-                    .append("<td style=\"padding: 0; text-align: center\"><h4 style=\"margin: 8px 0\">USD $ ").append(product.getPrice()).append("</h4></td>")
+                    .append("<td style=\"padding: 0; width: 50%\"><h4 style=\"margin: 8px 0\">")
+                    .append(product.getTitle())
+                    .append("</h4></td>")
+                    .append("<td style=\"padding: 0; text-align: center\"><h4 style=\"margin: 8px 0\">")
+                    .append(product.getCategory().getName().toUpperCase())
+                    .append("</h4></td>")
+                    .append("<td style=\"padding: 0; text-align: center\"><h4 style=\"margin: 8px 0\">")
+                    .append(item.getQuantity())
+                    .append(" pcs.</h4></td>")
+                    .append("<td style=\"padding: 0; text-align: center\"><h4 style=\"margin: 8px 0\">USD $ ")
+                    .append(product.getPrice())
+                    .append("</h4></td>")
                     .append("</tr>");
         }
         sb.append("</tbody></table>")
-                .append("<h3>Total: USD $ ").append(cart.getTotal()).append("</h3>")
+                .append("<h3>Total: USD $ ")
+                .append(cart.getTotal())
+                .append("</h3>")
                 .append("<h4>Best regards,<br/>WHYNOTPC</h4></div>");
 
         try {
@@ -93,6 +133,13 @@ public class CartService {
         return ok(cart);
     }
 
+    /**
+     * Adds an item to the user's shopping cart.
+     *
+     * @param productId       The ID of the product to add to the cart
+     * @param authentication  The authentication object containing user information
+     * @return response containing the updated shopping cart
+     */
     public CartResponse addItem(Long productId, Authentication authentication) {
         var cart = getCart(authentication);
         var product = productRepo.findById(productId).orElseThrow(EntityNotFoundException::new);
@@ -107,7 +154,15 @@ public class CartService {
         return ok(cart);
     }
 
-
+    /**
+     * Updates the quantity of an item in the user's shopping cart.
+     *
+     * @param itemId          The ID of the item to update
+     * @param quantity        The new quantity of the item
+     * @param authentication  The authentication object containing user information
+     * @return response containing the updated shopping cart
+     * @throws IllegalArgumentException If the quantity is less than 1
+     */
     public CartResponse updateItemQuantity(Long itemId, Integer quantity, Authentication authentication) {
         var cart = getCart(authentication);
         var item = orderItemRepo.findById(itemId).orElseThrow(EntityNotFoundException::new);
@@ -122,6 +177,13 @@ public class CartService {
         return ok(cart);
     }
 
+    /**
+     * Deletes an item from the user's shopping cart.
+     *
+     * @param itemId          The ID of the item to delete
+     * @param authentication  The authentication object containing user information
+     * @return response containing the updated shopping cart
+     */
     public CartResponse deleteItem(Long itemId, Authentication authentication) {
         var cart = getCart(authentication);
         var item = orderItemRepo.findById(itemId).orElseThrow(EntityNotFoundException::new);
@@ -130,6 +192,12 @@ public class CartService {
         return ok(cart);
     }
 
+    /**
+     * Clears all items from the user's shopping cart.
+     *
+     * @param authentication  The authentication object containing user information
+     * @return response containing the cleared shopping cart
+     */
     public CartResponse clearCart(Authentication authentication) {
         var cart = getCart(authentication);
         var items = cart.getItems();

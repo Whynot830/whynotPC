@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 
+/**
+ * A data transfer object (DTO) representing a user.
+ */
 public record UserDTO(
         Long id,
         String firstname,

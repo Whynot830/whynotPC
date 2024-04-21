@@ -21,6 +21,10 @@ import java.io.IOException;
 
 import static com.example.whynotpc.utils.CookieUtils.extractTokenFromCookie;
 
+/**
+ * Component class for JWT authentication filter.
+ * This filter intercepts requests and performs JWT authentication if necessary.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -28,6 +32,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final AccessTokenRepo accessTokenRepo;
 
+    /**
+     * Filters the HTTP request to perform JWT authentication.
+     *
+     * @param request     The HTTP request.
+     * @param response    The HTTP response.
+     * @param filterChain The filter chain.
+     * @throws ServletException If an error occurs during the servlet processing.
+     * @throws IOException      If an I/O error occurs.
+     */
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
